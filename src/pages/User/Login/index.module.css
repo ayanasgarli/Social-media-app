@@ -1,0 +1,47 @@
+body {
+  background-image: url('https://img.freepik.com/premium-vector/abstract-smooth-blur-purple-gradient-background-website-banner-paper-card-decorative-design_120819-485.jpg');
+  background-repeat: no-repeat;
+  background-size: cover;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.container {
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;  
+  padding: 50px;
+  background-color: rgba(255, 255, 255, 0.9); 
+  border-radius: 8px;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+}
+
+.container form {
+  width: 300px;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2); 
+  padding: 30px;
+  border-radius: 8px;
+  background-color: white;
+
+}
+
+.container form .MuiTextField-root {
+  margin-bottom: 15px;
+}
+
+.container form button {
+  margin-top: 20px;
+}
+
+.container p {
+  margin-top: 20px;
+  color: red;
+}

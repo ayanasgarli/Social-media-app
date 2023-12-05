@@ -5,7 +5,7 @@ import { Button, TextField, Typography, FormControlLabel, Checkbox, Grid } from 
 import Swal from 'sweetalert2';
 import { getAllUsers, postUser } from '../../../services/api/users'; 
 
-import '../Login/index.css';
+import '../Login/index.module.css';
 
 const RegisterSchema = Yup.object().shape({
   username: Yup.string()
@@ -65,13 +65,13 @@ const Register = () => {
   };
 
   return (
-    <div className="container">
-      <Typography variant="h4" style={{ color: '#9C27B0' }} gutterBottom>
+    <div className="container" style={{margin: '60px 460px'}}>
+      <Typography variant="h4" style={{ color: 'whitesmoke', textAlign: 'center' }} gutterBottom>
         Sign Up Form
       </Typography>
       <Formik initialValues={initialValues} validationSchema={RegisterSchema} onSubmit={handleSubmit}>
         {({ isSubmitting }) => (
-          <Form className="form" style={{ width: '500px', boxShadow: '0px 0px 5px rgba(0, 0, 0, 0.2)', padding: '30px', borderRadius: '8px' }}>
+          <Form className="form" style={{ width: '600px', boxShadow: '0px 0px 5px rgba(0, 0, 0, 0.2)', padding: '30px', borderRadius: '8px', backgroundColor: 'whitesmoke' }}>
             <Field name="username">
                {({ field }) => (
                 <TextField

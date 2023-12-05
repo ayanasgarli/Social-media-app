@@ -2,11 +2,11 @@ import React from 'react';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 import { Button, TextField, Typography, FormControlLabel, Checkbox } from '@mui/material';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
-import axios from 'axios'; 
-
-import './index.css';
+import axios from 'axios';
+import BASE_URL from '../../../services/api/BASE_URL';
+import './index.module.css';
 
 const LoginSchema = Yup.object().shape({
   username: Yup.string().required('Username is required'),
@@ -19,22 +19,23 @@ const Login = () => {
     password: '',
   };
 
+  const navigate = useNavigate();
+
   const handleSubmit = async (values, { setSubmitting }) => {
     const { username, password } = values;
-  
     try {
-      const response = await axios.get(`https://656ec3a06529ec1c6236974d.mockapi.io/api/users?search=${username}&password=${password}`);
+      const response = await axios.get(`${BASE_URL}/users?search=${username}&password=${password}`);
       const userData = response.data;
   
       if (userData.length > 0) {
-        localStorage.setItem('userData', JSON.stringify(userData));
-  
+        localStorage.setItem('loggedInUser', JSON.stringify(userData[0])); 
         Swal.fire({
           icon: 'success',
           title: 'Sign In Successful!',
           text: 'You have successfully signed in.',
           confirmButtonText: 'OK',
         });
+        navigate('/home');
       } else {
         Swal.fire({
           icon: 'error',
@@ -52,13 +53,13 @@ const Login = () => {
   
 
   return (
-    <div className="container" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', margin: '50px' }}>
-      <Typography variant="h4" style={{ color: '#9C27B0' }} gutterBottom>
+    <div className="container">
+      <Typography variant="h4" style={{ color: 'white', textAlign: 'center' }} gutterBottom>
         Sign In Form
       </Typography>
       <Formik initialValues={initialValues} validationSchema={LoginSchema} onSubmit={handleSubmit}>
         {({ isSubmitting }) => (
-          <Form style={{ width: '300px', boxShadow: '0px 0px 5px rgba(0, 0, 0, 0.2)', padding: '30px', borderRadius: '8px' }}>
+          <Form style={{ width: '300px', boxShadow: '0px 0px 5px rgba(0, 0, 0, 0.2)', padding: '30px', borderRadius: '8px', backgroundColor:'white' }}>
             <Field name="username">
               {({ field }) => (
                 <TextField
