@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 import { Button, TextField, Typography, FormControlLabel, Checkbox } from '@mui/material';
@@ -7,13 +7,16 @@ import Swal from 'sweetalert2';
 import axios from 'axios';
 import BASE_URL from '../../../services/api/BASE_URL';
 import './index.module.css';
+import { UserContext } from '../../../services/context/index';
 
 const LoginSchema = Yup.object().shape({
   username: Yup.string().required('Username is required'),
   password: Yup.string().required('Password is required'),
 });
 
+
 const Login = () => {
+  const { setUser } = useContext(UserContext)
   const initialValues = {
     username: '',
     password: '',
@@ -26,9 +29,12 @@ const Login = () => {
     try {
       const response = await axios.get(`${BASE_URL}/users?search=${username}&password=${password}`);
       const userData = response.data;
-  
-      if (userData.length > 0) {
-        localStorage.setItem('loggedInUser', JSON.stringify(userData[0])); 
+      
+      const loggedInUser = userData.find(user => user.username === username && user.password === password);
+
+      if (loggedInUser) {
+        localStorage.setItem('loggedInUser', JSON.stringify(loggedInUser));
+        setUser(loggedInUser);
         Swal.fire({
           icon: 'success',
           title: 'Sign In Successful!',
@@ -50,7 +56,6 @@ const Login = () => {
       setSubmitting(false);
     }
   };
-  
 
   return (
     <div className="container">

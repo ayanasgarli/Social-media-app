@@ -1,23 +1,34 @@
-import React, { useEffect, useState } from 'react';
-import { EditOutlined, InboxOutlined } from '@ant-design/icons';
-import { Avatar, Card, Button, Modal, Form, Input, List } from 'antd';
-import UserNavbar from '../../../components/UserNavbar';
+import React, { useEffect, useState, useContext } from "react";
+import { EditOutlined, InboxOutlined, LockOutlined } from "@ant-design/icons";
+import { Avatar, Card, Button, Modal, Form, Input, List } from "antd";
+import UserNavbar from "../../../components/UserNavbar";
+import { UserContext } from "../../../services/context";
+import BASE_URL from '../../../services/api/BASE_URL';
+import { updateUserPassword } from '../../../services/api/users';
 
 const { Meta } = Card;
 
 const UserPage = () => {
-  const [loggedInUser, setLoggedInUser] = useState(null);
-  const [editModalVisible, setEditModalVisible] = useState(false);
-  const [requestsModalVisible, setRequestsModalVisible] = useState(false);
+  const {
+    loggedInUser,
+    setLoggedInUser,
+    editModalVisible,
+    setEditModalVisible,
+    requestsModalVisible,
+    setRequestsModalVisible,
+  } = useContext(UserContext);
+
   const [editForm] = Form.useForm();
+  const [passwordModalVisible, setPasswordModalVisible] = useState(false);
+  const [passwordForm] = Form.useForm();
 
   useEffect(() => {
-    const storedUser = localStorage.getItem('loggedInUser');
+    const storedUser = localStorage.getItem("loggedInUser");
     if (storedUser) {
       const parsedUser = JSON.parse(storedUser);
       setLoggedInUser(parsedUser);
     }
-  }, []);
+  }, [setLoggedInUser]);
 
   const handleEditClick = () => {
     setEditModalVisible(true);
@@ -25,7 +36,6 @@ const UserPage = () => {
       fullName: loggedInUser.fullName,
       bio: loggedInUser.bio,
       email: loggedInUser.email,
-      password: loggedInUser.password,
       username: loggedInUser.username,
     });
   };
@@ -41,11 +51,10 @@ const UserPage = () => {
         fullName: values.fullName,
         bio: values.bio,
         email: values.email,
-        password: values.password,
         username: values.username,
       };
 
-      localStorage.setItem('loggedInUser', JSON.stringify(updatedUser));
+      localStorage.setItem("loggedInUser", JSON.stringify(updatedUser));
       setLoggedInUser(updatedUser);
       setEditModalVisible(false);
     });
@@ -59,28 +68,70 @@ const UserPage = () => {
     setRequestsModalVisible(false);
   };
 
+  const handlePasswordEditClick = () => {
+    setPasswordModalVisible(true);
+  };
+
+  const handlePasswordModalCancel = () => {
+    setPasswordModalVisible(false);
+  };
+
+  const handleSavePasswordChanges = async () => {
+    passwordForm.validateFields().then(async (values) => {
+      if (!values.currentPassword || !values.newPassword || !values.confirmNewPassword) {
+        return;
+      }
+      const userId = loggedInUser.id;
+
+      if (values.newPassword === values.confirmNewPassword) {
+        const newPassword = values.newPassword;
+        const updatedUser = await updateUserPassword(userId, newPassword);
+  
+        if (updatedUser) {
+          setPasswordModalVisible(false);
+          passwordForm.resetFields();
+        }   
+        // add 
+      } 
+    });
+  };
+  
+
   return (
     <>
       <UserNavbar />
       {loggedInUser && (
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
           <Card
             style={{
               width: 500,
             }}
             actions={[
               <EditOutlined key="edit" onClick={handleEditClick} />,
+              <LockOutlined key="password" onClick={handlePasswordEditClick} />,
               <Button key="requests" onClick={handleRequestsClick}>
                 Requests
               </Button>,
             ]}
           >
             <Meta
-               avatar={
+              avatar={
                 loggedInUser.profilePicture ? (
-                  <Avatar style={{width:'10vh', height: '10vh'}} src={loggedInUser.profilePicture} />
+                  <Avatar
+                    style={{ width: "10vh", height: "10vh" }}
+                    src={loggedInUser.profilePicture}
+                  />
                 ) : (
-                  <Avatar style={{width:'10vh', height: '10vh'}} src="https://static.thenounproject.com/png/5034901-200.png" />
+                  <Avatar
+                    style={{ width: "10vh", height: "10vh" }}
+                    src="https://static.thenounproject.com/png/5034901-200.png"
+                  />
                 )
               }
               title={loggedInUser.username}
@@ -111,11 +162,79 @@ const UserPage = () => {
               <Form.Item label="Email" name="email">
                 <Input type="email" />
               </Form.Item>
-              <Form.Item label="Password" name="password">
-                <Input.Password />
-              </Form.Item>
               <Form.Item label="Username" name="username">
                 <Input />
+              </Form.Item>
+            </Form>
+          </Modal>
+          {/* Password Modal */}
+          <Modal
+            title="Change Password"
+            visible={passwordModalVisible}
+            onCancel={handlePasswordModalCancel}
+            footer={[
+              <Button
+                key="save"
+                type="primary"
+                onClick={handleSavePasswordChanges}
+              >
+                Save Changes
+              </Button>,
+              <Button key="cancel" onClick={handlePasswordModalCancel}>
+                Cancel
+              </Button>,
+            ]}
+          >
+            <Form form={passwordForm} layout="vertical">
+              <Form.Item
+                label="Current Password"
+                name="currentPassword"
+                rules={[
+                  {
+                    required: true,
+                    message: "Please enter your current password",
+                  },
+                ]}
+              >
+                <Input type="password" />
+              </Form.Item>
+              <Form.Item
+                label="New Password"
+                name="newPassword"
+                rules={[
+                  { required: true, message: "Please enter a new password" },
+                  { min: 5, message: "Password must be at least 5 characters" },
+                  {
+                    pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{5,}$/,
+                    message:
+                      "Password must contain at least one uppercase letter, one lowercase letter, and one digit",
+                  },
+                ]}
+              >
+                <Input type="password" />
+              </Form.Item>
+              <Form.Item
+                label="Confirm New Password"
+                name="confirmNewPassword"
+                dependencies={["newPassword"]}
+                rules={[
+                  {
+                    required: true,
+                    message: "Please confirm your new password",
+                  },
+                  ({ getFieldValue }) => ({
+                    validator(_, value) {
+                      if (!value || getFieldValue("newPassword") === value) {
+                        return Promise.resolve();
+                      }
+                      return Promise.reject(
+                        new Error("The two passwords do not match")
+                      );
+                    },
+                  }),
+                ]}
+              >
+                <Input type="password" />
               </Form.Item>
             </Form>
           </Modal>
@@ -133,8 +252,12 @@ const UserPage = () => {
             <List
               header={<div>Incoming Requests</div>}
               bordered
-              // dataSource={[]}  
-              renderItem={(item) => <List.Item><InboxOutlined /> {item}</List.Item>}
+              // dataSource={[]}
+              renderItem={(item) => (
+                <List.Item>
+                  <InboxOutlined /> {item}
+                </List.Item>
+              )}
             />
           </Modal>
         </div>
@@ -144,54 +267,3 @@ const UserPage = () => {
 };
 
 export default UserPage;
-
-
-// import React, { useEffect } from 'react';
-// import { EditOutlined, EllipsisOutlined, SettingOutlined } from '@ant-design/icons';
-// import { Avatar, Card } from 'antd';
-// import { useNavigate } from 'react-router-dom';
-// import UserNavbar from '../../../components/UserNavbar';
-
-// const { Meta } = Card;
-
-// const UserPage = ({ user }) => {
-//   const navigate = useNavigate();
-
-//   useEffect(() => {
-//     if (!user) {
-//       navigate('/');
-//     }
-//   }, [user, navigate]);
-
-//   return (
-//     <>
-//       <UserNavbar />
-//       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '90vh' }}>
-//         <Card
-//           style={{
-//             width: 500,
-//           }}
-//           cover={
-//             <img
-//               alt="example"
-//               src="https://gw.alipayobjects.com/zos/rmsportal/JiqGstEfoWAOHiTxclqi.png"
-//             />
-//           }
-//           actions={[
-//             <SettingOutlined key="setting" />,
-//             <EditOutlined key="edit" />,
-//             <EllipsisOutlined key="ellipsis" />,
-//           ]}
-//         >
-//           <Meta
-//             avatar={<Avatar src="https://xsgames.co/randomusers/avatar.php?g=pixel" />}
-//             title="Card title"
-//             description="This is the description"
-//           />
-//         </Card>
-//       </div>
-//     </>
-//   );
-// };
-
-// export default UserPage;

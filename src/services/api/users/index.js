@@ -30,3 +30,15 @@ export const postUser = async(payload)=>{
     })
     return newUser;
 }
+
+export const updateUserPassword = async (userId, newPassword) => {
+    try {
+      const response = await axios.put(`${BASE_URL}/users/${userId}`, {
+        password: newPassword,
+      });
+      return response.data;
+    } catch (error) {
+      console.error(`Error updating password for user ${userId}: `, error);
+      return null;
+    }
+  };
