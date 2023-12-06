@@ -31,9 +31,9 @@ const Login = () => {
       const userData = response.data;
       
       const loggedInUser = userData.find(user => user.username === username && user.password === password);
-
+  
       if (loggedInUser) {
-        localStorage.setItem('loggedInUser', JSON.stringify(loggedInUser));
+        localStorage.setItem('loggedInUserId', loggedInUser.id);
         setUser(loggedInUser);
         Swal.fire({
           icon: 'success',

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import {
   Drawer,
   List,
@@ -12,28 +12,53 @@ import {
 import { Menu as MenuIcon } from "@mui/icons-material";
 import { Link, useNavigate } from "react-router-dom";
 import { Input } from "antd";
+import axios from "axios";
+import BASE_URL from "../../services/api/BASE_URL";
+import { UserContext } from "../../services/context";
 
 const { Search } = Input;
 
-const Navbar = () => {
+const UserNavbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [users, setUsers] = useState([]);
+  const { setUser } = useContext(UserContext);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    axios
+      .get(`${BASE_URL}/users`)
+      .then((response) => {
+        setUsers(response.data);
+      })
+      .catch((error) => {
+        console.error("Error fetching users:", error);
+      });
+  }, []);
 
   const toggleDrawer = (open) => (event) => {
     if (
-          event.type === "keydown" &&
-          (event.key === "Tab" || event.key === "Shift")
-        ) {
-          return;
-        }
-        setIsOpen(open);
+      event.type === "keydown" &&
+      (event.key === "Tab" || event.key === "Shift")
+    ) {
+      return;
+    }
+    setIsOpen(open);
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("loggedInUser");
+    localStorage.removeItem("loggedInUserId");
     navigate("/");
-    // dispatch(sign_out());
+    setLoggedInUser(null);
   };
+
+  const loggedInUserId = localStorage.getItem("loggedInUserId");
+
+  const filteredUsers = users.filter(
+    (user) =>
+      user.username.toLowerCase().includes(searchQuery.toLowerCase()) &&
+      user.id !== loggedInUserId // Exclude logged-in user
+  );
 
   return (
     <>
@@ -63,10 +88,16 @@ const Navbar = () => {
             </div>
             <Search
               placeholder="input search text"
-              style={{
-                width: 450,
-              }}
+              style={{ width: 450 }}
+              onChange={(e) => setSearchQuery(e.target.value)}
             />
+            {searchQuery && (
+              <div>
+                {filteredUsers.map((user) => (
+                  <div key={user.id}>{user.username}</div>
+                ))}
+              </div>
+            )}
           </Toolbar>
         </AppBar>
         <Drawer anchor="left" open={isOpen} onClose={toggleDrawer(false)}>
@@ -107,5 +138,4 @@ const Navbar = () => {
     </>
   );
 };
-
-export default Navbar;
+export default UserNavbar;
