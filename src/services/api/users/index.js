@@ -31,6 +31,20 @@ export const postUser = async(payload)=>{
     return newUser;
 }
 
+//Put user
+export const updateUseryByIDPut = async (id, updatedData) => {
+    let updatedCategory;
+    await axios.put(`${BASE_URL}/users/${id}`, updatedData)
+        .then((response) => {
+            updatedCategory = response.data;
+        })
+        .catch((error) => {
+            console.error('Error updating user:', error);
+        });
+    return updatedCategory;
+}
+
+// Updating password put
 export const updateUserPassword = async (userId, newPassword) => {
     try {
       const response = await axios.put(`${BASE_URL}/users/${userId}`, {
@@ -42,3 +56,15 @@ export const updateUserPassword = async (userId, newPassword) => {
       return null;
     }
   };
+
+// Add post 
+  export const addPostToUser = async (userId, postData) => {
+    try {
+      const response = await axios.post(`${BASE_URL}/users/${userId}/posts`, postData);
+      return response.data;
+    } catch (error) {
+      console.error(`Error adding post to user ${userId}: `, error);
+      return null;
+    }
+  };
+  

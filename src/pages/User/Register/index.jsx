@@ -78,6 +78,7 @@ const Register = () => {
                   {...field}
                   label="Username"
                   variant="outlined"
+                  autoComplete='off'
                   fullWidth
                   margin="normal"
                   helperText={<ErrorMessage name="username" />}
@@ -92,6 +93,7 @@ const Register = () => {
                       {...field}
                       label="Full Name"
                       variant="outlined"
+                      autoComplete='off'
                       fullWidth
                       margin="normal"
                       helperText={<ErrorMessage name="fullName" />}
@@ -106,6 +108,7 @@ const Register = () => {
                       {...field}
                       label="Email"
                       variant="outlined"
+                      autoComplete='off'
                       fullWidth
                       margin="normal"
                       helperText={<ErrorMessage name="email" />}

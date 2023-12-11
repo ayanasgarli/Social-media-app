@@ -1,9 +1,17 @@
-import React, { useEffect, useContext, useState } from 'react';
-import { getUserByID, updateUserPassword } from '../../../services/api/users';
-import { UserContext } from '../../../services/context/index';
-import { EditOutlined, LockOutlined } from "@ant-design/icons";
+import React, { useEffect, useContext, useState } from "react";
+import { getUserByID, updateUserPassword } from "../../../services/api/users";
+import { UserContext } from "../../../services/context/index";
+import { v4 as uuidv4 } from "uuid";
+import {
+  EditOutlined,
+  LockOutlined,
+  PlusOutlined,
+  DeleteOutlined,
+} from "@ant-design/icons";
 import { Avatar, Card, Button, Modal, Form, Input, List } from "antd";
 import UserNavbar from "../../../components/UserNavbar";
+import Post from "../CreatePost";
+
 
 const { Meta } = Card;
 
@@ -15,12 +23,14 @@ const UserPage = () => {
     setEditModalVisible,
     requestsModalVisible,
     setRequestsModalVisible,
+    postModalVisible,
+    setPostModalVisible,
   } = useContext(UserContext);
 
   const [editForm] = Form.useForm();
   const [passwordModalVisible, setPasswordModalVisible] = useState(false);
   const [passwordForm] = Form.useForm();
-  const loggedInUserId = localStorage.getItem('loggedInUserId'); 
+  const loggedInUserId = localStorage.getItem("loggedInUserId");
 
   useEffect(() => {
     if (loggedInUserId) {
@@ -29,7 +39,7 @@ const UserPage = () => {
           setLoggedInUser(userData);
         })
         .catch((error) => {
-          console.error('Error fetching user data:', error);
+          console.error("Error fetching user data:", error);
         });
     }
   }, [setLoggedInUser, loggedInUserId]);
@@ -58,7 +68,7 @@ const UserPage = () => {
         username: values.username,
       };
 
-      localStorage.setItem("loggedInUserId", loggedInUserId); 
+      localStorage.setItem("loggedInUserId", loggedInUserId);
       setLoggedInUser(updatedUser);
       setEditModalVisible(false);
     });
@@ -82,7 +92,11 @@ const UserPage = () => {
 
   const handleSavePasswordChanges = async () => {
     passwordForm.validateFields().then(async (values) => {
-      if (!values.currentPassword || !values.newPassword || !values.confirmNewPassword) {
+      if (
+        !values.currentPassword ||
+        !values.newPassword ||
+        !values.confirmNewPassword
+      ) {
         return;
       }
       const userId = loggedInUser.id;
@@ -90,58 +104,73 @@ const UserPage = () => {
       if (values.newPassword === values.confirmNewPassword) {
         const newPassword = values.newPassword;
         const updatedUser = await updateUserPassword(userId, newPassword);
-  
+
         if (updatedUser) {
           setPasswordModalVisible(false);
           passwordForm.resetFields();
-        }   
-        // add 
-      } 
+        }
+      }
     });
   };
-  
+
+  const handlePostClick = () => {
+    setPostModalVisible(true);
+  };
 
   return (
     <>
       <UserNavbar />
       {loggedInUser && (
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          <Card
-            style={{
-              width: 500,
-            }}
-            actions={[
-              <Button key="edit" onClick={handleEditClick}><EditOutlined  /></Button>,
-              <Button key="password" onClick={handlePasswordEditClick} ><LockOutlined /></Button>,
-              <Button key="requests" onClick={handleRequestsClick}>
-                Requests
-              </Button>,
-            ]}
-          >
-            <Meta
-              avatar={
-                loggedInUser.profilePicture ? (
-                  <Avatar
-                    style={{ width: "10vh", height: "10vh" }}
-                    src={loggedInUser.profilePicture}
-                  />
-                ) : (
-                  <Avatar
-                    style={{ width: "10vh", height: "10vh" }}
-                    src="https://static.thenounproject.com/png/5034901-200.png"
-                  />
-                )
-              }
-              title={loggedInUser.username}
-              description={loggedInUser.bio}
-            />
-          </Card>
+        <>
+          <div style={{ width: 600 }}>
+            <Card
+              style={{
+                width: "100%",
+                margin: "20px 0",
+              }}
+              actions={[
+                <Button key="edit" onClick={handleEditClick}>
+                  <EditOutlined />
+                </Button>,
+                <Button key="password" onClick={handlePasswordEditClick}>
+                  <LockOutlined />
+                </Button>,
+                <Button key="requests" onClick={handleRequestsClick}>
+                  Requests
+                </Button>,
+              ]}
+            >
+              <Meta
+              style={{fontSize: '18px'}}
+                avatar={
+                  loggedInUser.profilePicture ? (
+                    <Avatar
+                      style={{ width: "12vh", height: "12vh" }}
+                      src={loggedInUser.profilePicture}
+                    />
+                  ) : (
+                    <Avatar
+                      style={{ width: "10vh", height: "10vh" }}
+                      src="https://static.thenounproject.com/png/5034901-200.png"
+                    />
+                  )
+                }
+                title={loggedInUser.username}
+                description={loggedInUser.bio}
+              />
+              <div style={{ display: "flex", justifyContent: "space-evenly", fontSize: '18px' }}>
+                <p style={{ marginRight: "20px" }}>
+                  Posts: {loggedInUser?.posts?.length || 0}
+                </p>
+                <p style={{ marginRight: "20px" }}>
+                  Followers: {loggedInUser?.followers?.length || 0}
+                </p>
+                <p>Followings: {loggedInUser?.followings?.length || 0}</p>
+              </div>
+            </Card>
+
+          </div>
+          <Post/>
           {/* Edit Profile Modal */}
           <Modal
             title="Edit Profile"
@@ -264,7 +293,7 @@ const UserPage = () => {
               )}
             />
           </Modal>
-        </div>
+        </>
       )}
     </>
   );
