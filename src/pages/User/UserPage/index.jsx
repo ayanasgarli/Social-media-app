@@ -11,6 +11,7 @@ import {
 import { Avatar, Card, Button, Modal, Form, Input, List } from "antd";
 import UserNavbar from "../../../components/UserNavbar";
 import Post from "../CreatePost";
+import { Helmet } from "react-helmet";
 
 
 const { Meta } = Card;
@@ -119,6 +120,11 @@ const UserPage = () => {
 
   return (
     <>
+    <Helmet>
+        <meta charSet="utf-8" />
+        <title>User Home</title>
+        <link rel="icon" href="https://i.pinimg.com/originals/e9/87/e2/e987e2450f2a3b0fcddc6049db9278b7.png" />
+      </Helmet>
       <UserNavbar />
       {loggedInUser && (
         <>

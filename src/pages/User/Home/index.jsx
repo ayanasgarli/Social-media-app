@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import UserNavbar from '../../../components/UserNavbar';
 import styles from './index.module.css';
 import { UserContext } from '../../../services/context';
+import { Helmet } from "react-helmet";
 
 function Home() { 
   const navigate = useNavigate(); 
@@ -19,6 +20,11 @@ function Home() {
 
   return (
     <>
+    <Helmet>
+        <meta charSet="utf-8" />
+        <title>User Home</title>
+        <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/25/25694.png" />
+      </Helmet>
       {user && (
         <>
           <UserNavbar />

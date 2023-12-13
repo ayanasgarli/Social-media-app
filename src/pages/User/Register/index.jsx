@@ -4,7 +4,7 @@ import * as Yup from 'yup';
 import { Button, TextField, Typography, FormControlLabel, Checkbox, Grid } from '@mui/material';
 import Swal from 'sweetalert2';
 import { getAllUsers, postUser } from '../../../services/api/users'; 
-
+import { Helmet } from "react-helmet";
 import '../Login/index.module.css';
 
 const RegisterSchema = Yup.object().shape({
@@ -66,6 +66,11 @@ const Register = () => {
 
   return (
     <div className="container" style={{margin: '60px 460px'}}>
+      <Helmet>
+        <meta charSet="utf-8" />
+        <title>Register</title>
+        <link rel="icon" href="../../../public/favicon.ico" />
+      </Helmet>
       <Typography variant="h4" style={{ color: 'whitesmoke', textAlign: 'center' }} gutterBottom>
         Sign Up Form
       </Typography>
